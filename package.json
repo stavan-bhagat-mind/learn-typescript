@@ -5,14 +5,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "nodemon server.js",
     "dev": "nodemon src/app.ts",
-    "migration:generate": "npx sequelize-cli migration:generate --name",
-    "migration:run": "npx sequelize-cli db:migrate",
-    "migration:undo": "npx sequelize-cli db:migrate:undo",
-    "seeder:generate": "npx sequelize-cli seed:generate --name",
-    "seeder:run": "npx sequelize-cli db:seed:all",
-    "seeder:undo": "npx sequelize-cli db:seed:undo"
+    "db1:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db1",
+    "db2:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db2",
+    "db1:seed": "sequelize-cli db:seed:all --env development --config config.js --options-path .sequelizerc-db1",
+    "db2:seed": "sequelize-cli db:seed:all --env development --config config.js --options-path .sequelizerc-db2"
   },
   "keywords": [],
   "author": "",
@@ -23,13 +21,9 @@
     "express": "^4.21.2",
     "pg": "^8.13.1",
     "sequelize": "^6.37.5",
-    "sequelize-cli": "^6.6.2",
-    "typescript": "^5.7.2"
+    "sequelize-cli": "^6.6.2"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2",
-    "nodemon": "^2.0.22",
-    "ts-node": "^10.9.1"
+    "nodemon": "^2.0.22"
   }
 }
