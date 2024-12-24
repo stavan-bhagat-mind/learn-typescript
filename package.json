@@ -6,18 +6,30 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "node dist/app.js"
+    "dev": "nodemon src/app.ts",
+    "migration:generate": "npx sequelize-cli migration:generate --name",
+    "migration:run": "npx sequelize-cli db:migrate",
+    "migration:undo": "npx sequelize-cli db:migrate:undo",
+    "seeder:generate": "npx sequelize-cli seed:generate --name",
+    "seeder:run": "npx sequelize-cli db:seed:all",
+    "seeder:undo": "npx sequelize-cli db:seed:undo"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "sequelize": "^6.37.5",
+    "sequelize-cli": "^6.6.2",
     "typescript": "^5.7.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2"
+    "@types/node": "^22.10.2",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1"
   }
 }

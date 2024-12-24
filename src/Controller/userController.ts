@@ -1,42 +1,62 @@
 import { Request, Response } from "express";
 
-interface Item {
-  id: number;
-  name: string;
-}
+import User from "../db/models/user";
 
-const items: Item[] = [];
-let currentId = 1;
-
-export const createItem = (req: Request, res: Response) => {
-  console.log(req.body);
-  const newItem: Item = { id: currentId++, name: req.body.name };
-  items.push(newItem);
-  res.status(201).json(newItem);
-};
-
-export const getItems = (req: Request, res: Response) => {
-  res.json(items);
-};
-
-export const updateItem = (req: Request, res: Response) => {
-  const itemId = parseInt(req.params.id);
-  const item = items.find((i) => i.id === itemId);
-  if (item) {
-    item.name = req.body.name;
-    res.json(item);
-  } else {
-    res.status(404).send("Item not found");
+export const createItem = async (req: Request, res: Response) => {
+  try {
+    console.log(req.body);
+    const { name, email, password } = req.body;
+    const user = await User.create({ name, email, password });
+    res.status(201).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to create user" });
   }
 };
 
-export const deleteItem = (req: Request, res: Response) => {
-  const itemId = parseInt(req.params.id);
-  const index = items.findIndex((i) => i.id === itemId);
-  if (index !== -1) {
-    items.splice(index, 1);
-    res.status(204).send();
-  } else {
-    res.status(404).send("Item not found");
+export const getItems = async (req: Request, res: Response) => {
+  try {
+    const users = await User.findAll();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};
+
+export const updateItem = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { name, email, password } = req.body;
+    const [updated] = await User.update(
+      { name, email, password },
+      { where: { id } }
+    );
+    if (updated === 0) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update user" });
+  }
+};
+
+export const deleteItem = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const result = await User.destroy({ where: { id } });
+    if (result === 0) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete user" });
   }
 };
