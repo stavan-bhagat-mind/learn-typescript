@@ -7,29 +7,23 @@
     "build": "tsc",
     "start": "nodemon server.js",
     "dev": "nodemon src/app.ts",
-
     "tdb1:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db1",
     "tdb1:migrate:status": "sequelize-cli db:migrate:status --env development --config config.js --options-path .sequelizerc-db1",
     "tdb1:migrate:create": "sequelize-cli migration:generate --name temp --config config.js --options-path .sequelizerc-db1",
     "tdb1:migrate:undo": "sequelize-cli db:migrate:undo --env development --config config.js --options-path .sequelizerc-db1",
-
-    "db1:migrate": "sequelize-cli db:migrate --env development.databases.Database1 --config ./config/config.js --options-path ./.sequelizerc-db1",
+    "db1:migrate": "sequelize-cli db:migrate --env development_db1 --config ./config/config.js --options-path ./.sequelizerc-db1",
     "db1:migrate:status": "sequelize-cli db:migrate:status --env development --config ./config.js --options-path ./.sequelizerc-db1",
     "db1:migrate:create": "sequelize-cli migration:generate --name temp --config ./config.js --options-path ./.sequelizerc-db1",
     "db1:migrate:undo": "sequelize-cli db:migrate:undo --env development --config ./config.js --options-path ./.sequelizerc-db1",
-    
-    "db1:seed": "sequelize-cli db:seed:all --env development --config config.js --options-path .sequelizerc-db1",
+    "db1:seed": "sequelize-cli db:seed:all --env development_db1 --config config/config.js --options-path .sequelizerc-db1",
     "db1:seed:create": "npx sequelize-cli seed:generate --name demo-users --config config.js --options-path .sequelizerc-db1",
     "db1:seed:undo": "npx sequelize-cli db:seed:undo --seed 20231001-demo-users.js --config config.js --options-path .sequelizerc-db1",
     "db1:seed:run": "npx sequelize-cli db:seed --seed 20241225095059-product.js --config config.js --options-path .sequelizerc-db1",
-
-
-    "db2:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db2",
+    "db2:migrate": "sequelize-cli db:migrate --env development_db2 --config ./config/config.js --options-path .sequelizerc-db2",
     "db2:migrate:status": "sequelize db:migrate:status --env development --config config.js --options-path .sequelizerc-db2",
     "db2:migrate:create": "sequelize-cli migration:generate --name product --config config.js --options-path .sequelizerc-db2",
     "db2:migrate:undo": "sequelize-cli db:migrate:undo --env development --config config.js --options-path .sequelizerc-db2",
-    
-    "db2:seed": "sequelize-cli db:seed:all --env development --config config.js --options-path .sequelizerc-db2",
+    "db2:seed": "sequelize-cli db:seed:all --env development_db2 --config config/config.js --options-path .sequelizerc-db2",
     "db2:seed:create": "sequelize-cli seed:generate --name demo-products --config config.js --options-path .sequelizerc-db2",
     "db2:seed:undo": "sequelize-cli db:seed:undo --seed 20231001-demo-products.js --config config.js --options-path .sequelizerc-db2",
     "db2:seed:run": "sequelize-cli db:seed --seed 20241225102155-demo-products.js --config config.js --options-path .sequelizerc-db2"
@@ -41,6 +35,7 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
     "pg": "^8.13.1",
     "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.2"

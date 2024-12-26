@@ -1,10 +1,9 @@
-const indexController = require("express").Router();
+const indexRouter = require("express").Router();
 const userRouter = require("./userRouter");
 
-indexController.use("/user", userRouter);
+indexRouter.use("/user", userRouter);
 
-module.exports = indexController;
-
+module.exports = indexRouter;
 
 // API rate limit (User can hit a particular API x amount of time in T duration. e.g UserA can hit an API (/login) 20 times max within 5 min timeframe,
 // if exceeded, reject the request)
