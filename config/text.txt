@@ -15,3 +15,146 @@ RDS_USERNAME2=postgres
 RDS_PASSWORD2=mind
 RDS_HOSTNAME2=192.168.1.194
 RDS_PORT2=5432
+
+//redis commands
+-> 127.0.0.1:6379> SCAN 0
+1) "0"
+2) 1) "rateLimit:::1:/data"
+->127.0.0.1:6379> GET rateLimit:::1:/data
+"2"
+
+
+// redis-rate-limiter.js
+const Redis = require('ioredis');
+const redis = new Redis({
+  host: 'localhost',
+  port: 6379
+  // Add other Redis configuration as needed
+});
+
+// 1. Simple Fixed Window Implementation
+const simpleRateLimiter = () => {
+  return async (req, res, next) => {
+    try {
+      const userId = req.user?.id || req.ip;
+      const key = `ratelimit:${userId}:${req.path}`;
+      
+      // Get current count for this user and endpoint
+      const currentCount = await redis.get(key);
+      
+      // If key doesn't exist, create it with count 1 and TTL
+      if (!currentCount) {
+        await redis.setex(key, 60, 1); // 60 seconds expiry
+        return next();
+      }
+      
+      // If count exists but under limit, increment it
+      if (parseInt(currentCount) < 10) { // Limit of 10 requests per minute
+        await redis.incr(key);
+        return next();
+      }
+      
+      // Rate limit exceeded
+      res.status(429).json({
+        error: 'Rate limit exceeded',
+        message: 'Please try again later'
+      });
+      
+    } catch (error) {
+      console.error('Rate limiter error:', error);
+      next(error);
+    }
+  };
+};
+
+// 2. Sliding Window Implementation
+const slidingWindowRateLimiter = () => {
+  return async (req, res, next) => {
+    try {
+      const userId = req.user?.id || req.ip;
+      const key = `ratelimit:${userId}:${req.path}`;
+      const now = Date.now();
+      const windowSize = 60 * 1000; // 1 minute in milliseconds
+      
+      // Remove old requests and add new one
+      const pipeline = redis.pipeline();
+      pipeline.zremrangebyscore(key, 0, now - windowSize);
+      pipeline.zadd(key, now, now);
+      pipeline.zcard(key);
+      pipeline.expire(key, 60); // Set TTL
+      
+      const results = await pipeline.exec();
+      const requestCount = results[2][1];
+      
+      if (requestCount > 10) { // Limit of 10 requests per minute
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          message: 'Please try again later'
+        });
+      }
+      
+      next();
+      
+    } catch (error) {
+      console.error('Rate limiter error:', error);
+      next(error);
+    }
+  };
+};
+
+// 3. Token Bucket Implementation
+const tokenBucketRateLimiter = () => {
+  return async (req, res, next) => {
+    try {
+      const userId = req.user?.id || req.ip;
+      const key = `ratelimit:${userId}:${req.path}`;
+      const now = Date.now();
+      
+      // Get bucket data
+      const bucket = await redis.hgetall(key);
+      
+      if (!bucket.tokens) {
+        // Initialize bucket
+        await redis.hmset(key, {
+          tokens: 10, // Max tokens
+          lastRefill: now
+        });
+        await redis.expire(key, 60);
+        return next();
+      }
+      
+      // Calculate tokens to refill
+      const tokens = parseInt(bucket.tokens);
+      const lastRefill = parseInt(bucket.lastRefill);
+      const refillRate = 1; // Tokens per second
+      const timePassed = (now - lastRefill) / 1000;
+      const refillAmount = Math.floor(timePassed * refillRate);
+      const newTokens = Math.min(10, tokens + refillAmount);
+      
+      if (newTokens < 1) {
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          message: 'Please try again later'
+        });
+      }
+      
+      // Update bucket
+      await redis.hmset(key, {
+        tokens: newTokens - 1,
+        lastRefill: now
+      });
+      
+      next();
+      
+    } catch (error) {
+      console.error('Rate limiter error:', error);
+      next(error);
+    }
+  };
+};
+
+module.exports = {
+  simpleRateLimiter,
+  slidingWindowRateLimiter,
+  tokenBucketRateLimiter
+};

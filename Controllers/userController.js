@@ -1,4 +1,5 @@
 const db = require("../db/index");
+const redisClient = require("../config/redisConfig");
 
 module.exports.getUser = async (req, res) => {
   try {

@@ -2,7 +2,7 @@ require("dotenv").config();
 const indexRouter = require("./Routers/indexRoute");
 const Express = require("express");
 const db = require("./db/index");
-const limiter = require("./Middlewares/rateLimiterGlobal");
+const apiLimiter = require("./Middlewares/rateLimiterIndividual");
 const app = Express();
 const port = process.env.PORT || 3000;
 
@@ -16,11 +16,11 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   next();
-}); 
-app.use(limiter);
+});
+// app.use(limiter);
 app.use("/", indexRouter);
 
-app.get("/data", async (req, res) => {
+app.get("/data", apiLimiter, async (req, res) => {
   try {
     const users = await db.development_db1.models.User.findAll();
     const products = await db.development_db2.models.Product.findAll();
