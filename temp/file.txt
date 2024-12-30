@@ -1,0 +1,8 @@
+Node.js Streams
+Last Updated : 09 Aug, 2024
+Node.js streams are a key part of handling I/O operations efficiently. They provide a way to read or write data continuously, allowing for efficient data processing, manipulation, and transfer.
+
+Node.js Streams
+The stream module in Node.js provides an abstraction for working with streaming data. Streams are a powerful feature that allows handling data in chunks rather than loading it all at once, which is efficient for both memory usage and performance.
+
+The official Node.js documentation defines streams as “A stream is an abstract interface for working with streaming data in Node.js.” The stream module provides an API for implementing the stream interface. Examples of the stream object in Node.js can be a request to an HTTP server and process.stdout are both stream instances. In short, Streams are objects in Node.js that lets the user read data from a source or write data to a destination in a continuous manner.
