@@ -27,11 +27,14 @@ function createWorker(data) {
   });
 }
 
+const MAIN_PORT = process.env.PORT || 3000;
+
 if (cluster.isMaster) {
   console.log(`Master process ${process.pid} started`);
 
-  // Run examples
+  // Run examples only once in master process
   runExamples();
+
   // Fork workers equal to CPU cores
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -48,7 +51,11 @@ if (cluster.isMaster) {
 
   // Regular route - no worker thread needed
   app.get("/api/simple", (req, res) => {
-    res.json({ message: "Simple response" });
+    res.json({
+      message: "Simple response",
+      workerId: cluster.worker.id,
+      pid: process.pid,
+    });
   });
 
   // CPU intensive route - uses worker thread
@@ -56,13 +63,11 @@ if (cluster.isMaster) {
     try {
       const number = parseInt(req.params.number);
       const result = await createWorker({ number });
-      process.send({
-        type: "computation",
-        workerId: cluster.worker.id,
-        input: number,
+      res.json({
         result,
+        workerId: cluster.worker.id,
+        pid: process.pid,
       });
-      res.json({ result });
     } catch (error) {
       console.error(`Computation error:`, error);
       res.status(500).json({ error: error.message });
@@ -73,14 +78,20 @@ if (cluster.isMaster) {
   app.get("/api/users", async (req, res) => {
     try {
       const users = await db.users.findAll();
-      res.json(users);
+      res.json({
+        users,
+        workerId: cluster.worker.id,
+        pid: process.pid,
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   });
 
-  const port = 3000 + cluster.worker.id; // Different port for each worker
-  app.listen(port, () => {
-    console.log(`Worker ${process.pid} started on port ${port}`);
+  // All workers listen on the same main port
+  app.listen(MAIN_PORT, () => {
+    console.log(
+      `Worker ${process.pid} started and listening on port ${MAIN_PORT}`
+    );
   });
 }
