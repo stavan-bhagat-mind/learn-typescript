@@ -162,9 +162,6 @@ function runExamples() {
   });
 }
 
-
-runExamples();
-
 module.exports = {
   copyFile,
   transformFile,

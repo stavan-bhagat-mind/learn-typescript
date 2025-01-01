@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "nodemon server.js",
+    "start": "nodemon servervideoDownload.js",
     "dev": "nodemon src/app.ts",
     "tdb1:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db1",
     "tdb1:migrate:status": "sequelize-cli db:migrate:status --env development --config config.js --options-path .sequelizerc-db1",
@@ -33,9 +33,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.7.9",
+    "bull": "^4.16.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.13.1",
     "redis": "^4.7.0",
     "sequelize": "^6.37.5",

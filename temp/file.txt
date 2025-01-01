@@ -1,3 +1,7 @@
+curl -X POST http://localhost:3000/upload \
+  -F 'video=@/Users/mind/Documents/demo/learnTypeScript/typescript/temp/Node JS Event Loop_ The One Thing Most Developers Overlook!.mp4'
+
+
 Node.js Streams
 Last Updated : 09 Aug, 2024
 Node.js streams are a key part of handling I/O operations efficiently. They provide a way to read or write data continuously, allowing for efficient data processing, manipulation, and transfer.
