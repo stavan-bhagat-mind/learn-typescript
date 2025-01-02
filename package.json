@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "nodemon servervideoDownload.js",
+    "start": "nodemon server2.js",
     "dev": "nodemon src/app.ts",
     "tdb1:migrate": "sequelize-cli db:migrate --env development --config config.js --options-path .sequelizerc-db1",
     "tdb1:migrate:status": "sequelize-cli db:migrate:status --env development --config config.js --options-path .sequelizerc-db1",

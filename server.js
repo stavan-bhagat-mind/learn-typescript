@@ -1,4 +1,3 @@
-// server.js
 require("dotenv").config();
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
@@ -9,18 +8,45 @@ const db = require("./db/index");
 const apiLimiter = require("./Middlewares/rateLimiterIndividual");
 const { runExamples } = require("./Controllers/streamController");
 const path = require("path");
+const Queue = require("bull");
 
-// Create a worker thread for CPU-intensive tasks
+// Thread pool implementation
+const workerPool = [];
+const maxWorkers = 4;
+
+for (let i = 0; i < maxWorkers; i++) {
+  workerPool.push(
+    new Worker(path.join(__dirname, "workers", "computeWorker.js"))
+  );
+}
+
+// Create a Bull queue
+const computeQueue = new Queue("compute");
+computeQueue.process(async (job, done) => {
+  try {
+    const result = await createWorker(job.data);
+    done(null, result);
+  } catch (error) {
+    done(error);
+  }
+});
+
 function createWorker(data) {
   return new Promise((resolve, reject) => {
-    const worker = new Worker(
-      path.join(__dirname, "workers", "computeWorker.js")
-    );
+    if (workerPool.length === 0) {
+      return reject(new Error("No available workers"));
+    }
 
-    worker.on("message", resolve);
-    worker.on("error", reject);
-    worker.on("exit", (code) => {
-      if (code !== 0) reject(new Error(`Worker stopped with code ${code}`));
+    const worker = workerPool.pop();
+
+    worker.once("message", (result) => {
+      workerPool.push(worker);
+      resolve(result);
+    });
+
+    worker.once("error", (err) => {
+      workerPool.push(worker);
+      reject(err);
     });
 
     worker.postMessage(data);
@@ -62,7 +88,8 @@ if (cluster.isMaster) {
   app.get("/api/compute/:number", async (req, res) => {
     try {
       const number = parseInt(req.params.number);
-      const result = await createWorker({ number });
+      const job = await computeQueue.add({ number });
+      const result = await job.finished();
       res.json({
         result,
         workerId: cluster.worker.id,
@@ -88,7 +115,6 @@ if (cluster.isMaster) {
     }
   });
 
-  // All workers listen on the same main port
   app.listen(MAIN_PORT, () => {
     console.log(
       `Worker ${process.pid} started and listening on port ${MAIN_PORT}`

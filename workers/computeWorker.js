@@ -1,10 +1,8 @@
 const { parentPort } = require("worker_threads");
 
-parentPort.on("message", (number) => {
+parentPort.on("message", async (data) => {
   try {
-    const result = performCalculation(number);
-
-    // Send result back to main thread
+    const result = await performCalculation(data.number);
     parentPort.postMessage({
       success: true,
       result: result,
@@ -18,9 +16,19 @@ parentPort.on("message", (number) => {
 });
 
 function performCalculation(number) {
-  let result = 0;
-  for (let i = 0; i < number; i++) {
-    result += Math.sqrt(i);
-  }
-  return result;
+  return new Promise((resolve, reject) => {
+    let result = 0;
+    setTimeout(() => {
+      try {
+        for (let i = 0; i < number; i++) {
+          result += Math.sqrt(i);
+        }
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    }, 0);
+  });
 }
+
+

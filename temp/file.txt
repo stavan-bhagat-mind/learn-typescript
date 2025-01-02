@@ -1,6 +1,7 @@
 curl -X POST http://localhost:3000/upload \
   -F 'video=@/Users/mind/Documents/demo/learnTypeScript/typescript/temp/Node JS Event Loop_ The One Thing Most Developers Overlook!.mp4'
 
+// ab -n 100 -c 10 http://localhost:3000/api/compute/1000
 
 Node.js Streams
 Last Updated : 09 Aug, 2024
