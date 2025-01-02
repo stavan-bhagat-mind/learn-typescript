@@ -32,6 +32,7 @@ echo "Load test completed."
 
 
 # cmd-- # Make the script executable (only needs to be done once)
+# brew install httpd
 # chmod +x /Users/mind/Documents/demo/learnTypeScript/typescript/test/load_test.sh
 
 # Run the script
